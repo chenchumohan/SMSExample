@@ -23,7 +23,7 @@ import com.example.config.SmsService;
 public class SMSController {
 
 	@Autowired
-    SmsService service;
+    private SmsService service;
 
     @Autowired
     private SimpMessagingTemplate webSocket;
@@ -33,8 +33,11 @@ public class SMSController {
     @RequestMapping(path = { "/sms" }, method = RequestMethod.POST,consumes="application/json", produces = "application/json")
     public SmsPojo smsSubmit(@RequestBody SmsPojo sms) {
         try{
-        	System.out.println("sms======>"+sms.getToNumber());
-        	System.out.println("sms======>"+sms.getTextMessage());
+        	System.out.println("sms======>"+sms.getPhone_number());
+        	System.out.println("sms==message====>"+sms.getComments());
+        	System.out.println("sms===Customer Details===>"+sms.getCustomer_details());
+        	System.out.println("sms==Customer Requirements====>"+sms.getCustomer_requirments());
+        	System.out.println("sms==Order Details====>"+sms.getOrder_details());
             service.send(sms);
         }
         catch(Exception e){
@@ -42,17 +45,12 @@ public class SMSController {
             webSocket.convertAndSend(TOPIC_DESTINATION, getTimeStamp() + ": Error sending the SMS: "+e.getMessage());
             throw e;
         }
-        webSocket.convertAndSend(TOPIC_DESTINATION, getTimeStamp() + ": SMS has been sent!: "+sms.getToNumber());
+        webSocket.convertAndSend(TOPIC_DESTINATION, getTimeStamp() + ": SMS has been sent!: "+sms.getPhone_number());
+        System.out.println("webSocket===>"+getTimeStamp());
 		return sms;
 
     }
 
-    @RequestMapping(value = "/smscallback", method = RequestMethod.POST,
-            consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public void smsCallback(@RequestBody MultiValueMap<String, String> map) {
-       service.receive(map);
-       webSocket.convertAndSend(TOPIC_DESTINATION, getTimeStamp() + ": Twilio has made a callback request! Here are the contents: "+map.toString());
-    }
 
     private String getTimeStamp() {
        return DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now());
