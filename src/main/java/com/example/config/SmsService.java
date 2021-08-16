@@ -1,5 +1,6 @@
 package com.example.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
@@ -17,19 +18,19 @@ public class SmsService {
 	private String AUTH_TOKEN;
 	@Value("${FROM_NUMBER}")
 	private String FROM_NUMBER;
-
+    @Autowired
+    private SMSRepository smsRepo;
 	    public void send(SmsPojo sms) {
 	    	Twilio.init(ACCOUNT_SID, AUTH_TOKEN);
 	    	System.out.println("ACCOUNT_SID=====>"+ACCOUNT_SID);
 	    	System.out.println("AUTH_TOKEN=====>"+AUTH_TOKEN);
 	    	System.out.println("FROM_NUMBER=====>"+FROM_NUMBER);
-	        Message message = Message.creator(new PhoneNumber(sms.getToNumber()), new PhoneNumber(FROM_NUMBER), sms.getTextMessage())
+	        Message message = Message.creator(new PhoneNumber(sms.getPhone_number()), new PhoneNumber(FROM_NUMBER), sms.getComments())
 	                .create();
+	        smsRepo.save(sms);
 	    	        System.out.println("here is my id:"+message.getSid());
 	    	        System.out.println("*********Message Sent Successfully***********");
 	    }
 
-	    public void receive(MultiValueMap<String, String> smscallback) {
-	    }
-	
+	  
 }
